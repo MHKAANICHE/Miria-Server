@@ -28,6 +28,6 @@ def upload_Wav():
 if __name__ == "__main__":
     os.makedirs("temp", exist_ok=True)
     # Open Port https://196.224.153.85:8080/
-    app.run(host='0.0.0.0', port=80, debug=True)
+    # app.run(host='0.0.0.0', port=80, debug=True)
     # Local on my pc 
-    # app.run(debug=True)
+    app.run(debug=True)
