@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
 from flask import Flask, render_template, request, redirect, url_for, send_file
 import os
 import librosa
@@ -46,23 +44,23 @@ def generate_waveform_image(audio_path):
     return image_stream
 
 
-def generate_mel_spectrogram(audio_path):
-    waveform, _ = torchaudio.load(audio_path)
-    mel_transform = T.MelSpectrogram(n_mels=64, n_fft=400, hop_length=160)
-    mel_spectrogram = mel_transform(waveform)
+# def generate_mel_spectrogram(audio_path):
+#     waveform, _ = torchaudio.load(audio_path)
+#     mel_transform = T.MelSpectrogram(n_mels=64, n_fft=400, hop_length=160)
+#     mel_spectrogram = mel_transform(waveform)
     
-    plt.figure(figsize=(10, 4))
-    plt.imshow(mel_spectrogram[0].detach().numpy(), cmap='viridis', origin='lower', aspect='auto')
-    plt.title('Mel Spectrogram Visualization')
-    plt.xlabel('Frame')
-    plt.ylabel('Mel Filter')
-    plt.tight_layout()
+#     plt.figure(figsize=(10, 4))
+#     plt.imshow(mel_spectrogram[0].detach().numpy(), cmap='viridis', origin='lower', aspect='auto')
+#     plt.title('Mel Spectrogram Visualization')
+#     plt.xlabel('Frame')
+#     plt.ylabel('Mel Filter')
+#     plt.tight_layout()
 
-    image_stream = BytesIO()
-    plt.savefig(image_stream, format='png')
-    plt.close()
-    image_stream.seek(0)
-    return image_stream
+#     image_stream = BytesIO()
+#     plt.savefig(image_stream, format='png')
+#     plt.close()
+#     image_stream.seek(0)
+#     return image_stream
 
 
 @app.route('/uploads/<filename>')
@@ -74,10 +72,10 @@ def waveform(filename):
     waveform_image_stream = generate_waveform_image(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return send_file(waveform_image_stream, mimetype='image/png')
 
-@app.route('/mel_spectrogram/<filename>')
-def mel_spectrogram(filename):
-    mel_spectrogram_image_stream = generate_mel_spectrogram(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return send_file(mel_spectrogram_image_stream, mimetype='image/png')
+# @app.route('/mel_spectrogram/<filename>')
+# def mel_spectrogram(filename):
+#     mel_spectrogram_image_stream = generate_mel_spectrogram(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+#     return send_file(mel_spectrogram_image_stream, mimetype='image/png')
 
 # Function to apply the audio modification
 def apply_audio_modification(audio_path):
@@ -105,23 +103,23 @@ def compare():
         file.save(file_path)
         
         original_waveform_image_stream = generate_waveform_image(file_path)
-        original_mel_spectrogram_image_stream = generate_mel_spectrogram(file_path)
+        # original_mel_spectrogram_image_stream = generate_mel_spectrogram(file_path)
         
         modified_waveform = apply_audio_modification(file_path)
         modified_audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'modified_' + file.filename)
         torchaudio.save(modified_audio_path, modified_waveform, 44100)  # Adjust sample rate if needed
         
         modified_waveform_image_stream = generate_waveform_image(modified_audio_path)
-        modified_mel_spectrogram_image_stream = generate_mel_spectrogram(modified_audio_path)
+        # modified_mel_spectrogram_image_stream = generate_mel_spectrogram(modified_audio_path)
         
         return render_template(
             'index.html',
             original_audio_url=url_for('uploaded_file', filename=file.filename),
             modified_audio_url=url_for('uploaded_file', filename='modified_' + file.filename),
             original_waveform_url=url_for('waveform', filename=file.filename),
-            original_mel_spectrogram_url=url_for('mel_spectrogram', filename=file.filename),
-            modified_waveform_url=url_for('waveform', filename='modified_' + file.filename),
-            modified_mel_spectrogram_url=url_for('mel_spectrogram', filename='modified_' + file.filename),
+            # original_mel_spectrogram_url=url_for('mel_spectrogram', filename=file.filename),
+            modified_waveform_url=url_for('waveform', filename='modified_' + file.filename)
+            # modified_mel_spectrogram_url=url_for('mel_spectrogram', filename='modified_' + file.filename),
         )
     
     return redirect(request.url)
