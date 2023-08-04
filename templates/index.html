@@ -23,51 +23,68 @@
     <div class="container">
         <h1 class="text-center mb-4">Audio Comparison</h1>
         
-        <div class="mb-4">
-            <h2>Upload Audio File</h2>
-            <form action="/compare" method="post" enctype="multipart/form-data">
-                <div class="input-group">
-                    <input type="file" name="file" accept=".wav, .mp3" required class="form-control">
-                    <button type="submit" class="btn btn-primary">Compare</button>
-                </div>
-            </form>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Upload Audio File</h2>
+                <form action="/compare" method="post" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <input type="file" name="file" accept=".wav, .mp3" required class="form-control">
+                        <button type="submit" class="btn btn-primary">Compare</button>
+                    </div>
+                </form>
+            </div>
         </div>
         
-        <!-- Add animations to the audio and image elements -->
         {% if original_audio_url and modified_audio_url %}
-            <h2 class="mt-4">Original Audio</h2>
-            <audio controls class="mb-3 animate__animated animate__fadeInLeft">
-                <source src="{{ original_audio_url }}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
-            
-            <h2>Modified Audio</h2>
-            <audio controls class="mb-3 animate__animated animate__fadeInRight">
-                <source src="{{ modified_audio_url }}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
-            
-            <h2 class="mt-4">Waveform Comparison</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>Original Waveform</h3>
-                    <img src="{{ original_waveform_url }}" alt="Original Waveform" class="img-fluid animate__animated animate__fadeInLeft">
-                </div>
-                <div class="col-md-6">
-                    <h3>Modified Waveform</h3>
-                    <img src="{{ modified_waveform_url }}" alt="Modified Waveform" class="img-fluid animate__animated animate__fadeInRight">
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="card-title">Original Audio</h2>
+                    <audio controls class="mb-3 animate__animated animate__fadeInLeft">
+                        <source src="{{ original_audio_url }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
             </div>
             
-            <h2 class="mt-4">Mel Spectrogram Comparison</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>Original Mel Spectrogram</h3>
-                    <img src="{{ original_mel_spectrogram_url }}" alt="Original Mel Spectrogram" class="img-fluid animate__animated animate__fadeInLeft">
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="card-title">Modified Audio</h2>
+                    <audio controls class="mb-3 animate__animated animate__fadeInRight">
+                        <source src="{{ modified_audio_url }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
-                <div class="col-md-6">
-                    <h3>Modified Mel Spectrogram</h3>
-                    <img src="{{ modified_mel_spectrogram_url }}" alt="Modified Mel Spectrogram" class="img-fluid animate__animated animate__fadeInRight">
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="card-title">Waveform Comparison</h2>
+                    <div class="d-flex flex-md-row flex-column">
+                        <div class="col-md-6">
+                            <h3>Original Waveform</h3>
+                            <img src="{{ original_waveform_url }}" alt="Original Waveform" class="img-fluid animate__animated animate__fadeInLeft">
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <h3>Modified Waveform</h3>
+                            <img src="{{ modified_waveform_url }}" alt="Modified Waveform" class="img-fluid animate__animated animate__fadeInRight">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h2 class="card-title">Mel Spectrogram Comparison</h2>
+                    <div class="d-flex flex-md-row flex-column">
+                        <div class="col-md-6">
+                            <h3>Original Mel Spectrogram</h3>
+                            <img src="{{ original_mel_spectrogram_url }}" alt="Original Mel Spectrogram" class="img-fluid animate__animated animate__fadeInLeft">
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <h3>Modified Mel Spectrogram</h3>
+                            <img src="{{ modified_mel_spectrogram_url }}" alt="Modified Mel Spectrogram" class="img-fluid animate__animated animate__fadeInRight">
+                        </div>
+                    </div>
                 </div>
             </div>
         {% endif %}
@@ -78,3 +95,4 @@
     <script src="https://cdn.jsdelivr.net/npm/animate.css"></script>
 </body>
 </html>
+

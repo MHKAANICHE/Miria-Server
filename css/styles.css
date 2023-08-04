@@ -37,3 +37,55 @@ body {
     margin-right: 10px;
 }
 
+/* Apply custom styles to the container */
+.container {
+    padding: 20px;
+}
+
+/* Add margin to the cards */
+.card {
+    margin-bottom: 20px;
+}
+
+/* Center align the audio controls */
+audio {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Apply animation to the images */
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Center align headings */
+.card-title, h2, h3 {
+    text-align: center;
+}
+
+/* Adjust margins for headings */
+h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin-top: 15px;
+}
+
+/* Add some spacing to the form button */
+.btn-primary {
+    margin-top: 10px;
+}
+
+/* Add responsive breakpoints */
+@media (max-width: 767px) {
+    .d-flex {
+        display: block !important;
+    }
+    
+    .flex-md-row {
+        flex-direction: column !important;
+    }
+}
