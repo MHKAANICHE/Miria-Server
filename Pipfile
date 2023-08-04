@@ -11,6 +11,7 @@ torch = "*"
 torchaudio = "*"
 pillow = "*"
 flask-caching = "*"
+soundfile = "*"
 
 [dev-packages]
 

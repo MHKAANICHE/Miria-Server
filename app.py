@@ -10,19 +10,14 @@ import torchaudio
 import torchaudio.transforms as T
 from PIL import Image, ImageDraw
 
+import soundfile as sf  # For saving audio files
+from your_model import NoisingAutoencoder  # Import your model class
+import numpy as np
+
 app = Flask(__name__)
-
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'wav', 'mp3'}
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 def generate_waveform_image(audio_path):
     waveform, _ = librosa.load(audio_path, sr=None)
@@ -44,47 +39,77 @@ def generate_waveform_image(audio_path):
     return image_stream
 
 
-# def generate_mel_spectrogram(audio_path):
-#     waveform, _ = torchaudio.load(audio_path)
-#     mel_transform = T.MelSpectrogram(n_mels=64, n_fft=400, hop_length=160)
-#     mel_spectrogram = mel_transform(waveform)
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'wav', 'mp3'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Get the absolute path of the directory containing the script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Define your model instance
+
+# First, initialize the model
+model = NoisingAutoencoder()
+
+# Load the weights from the saved state_dict
+model.load_state_dict(torch.load("5ouza3bol_hamdi.pt"))
+
+# Set the model to evaluation mode
+model.eval()
+
+def apply_audio_modification(audio_path, filename):
+    # Get the absolute path of the audio file
+    audio_path = os.path.join(audio_path)
+    print ("Debug 1 : - audio_path",audio_path)
+
+    # Load your new audio file using librosa
+    new_audio, sr = librosa.load(audio_path, sr=None)
+
+    # Normalize audio to between -1 and 1
+    audio = new_audio / np.abs(new_audio).max()
+
+    # Reshape the audio data to add an extra dimension for the model
+    # The shape should be (1, 1, length_of_audio)
+    audio = audio[np.newaxis, np.newaxis, :]
+
+    # Convert to tensor
+    audio_tensor = torch.from_numpy(audio).float()
+
+    # Pass the audio through the model
+    with torch.no_grad():
+        noisy_audio = model(audio_tensor)
+
+    # The output will be a tensor. You can convert it to a numpy array like this:
+    noisy_audio = noisy_audio.numpy()
+
+    # The shape of the output will be (1, 1, length_of_audio). 
+    # If you want to convert it back to a 1D array, you can do this:
+    noisy_audio = np.squeeze(noisy_audio)
     
-#     plt.figure(figsize=(10, 4))
-#     plt.imshow(mel_spectrogram[0].detach().numpy(), cmap='viridis', origin='lower', aspect='auto')
-#     plt.title('Mel Spectrogram Visualization')
-#     plt.xlabel('Frame')
-#     plt.ylabel('Mel Filter')
-#     plt.tight_layout()
+    # Save the modified waveform as a new audio file
+    modified_audio_name = os.path.splitext(os.path.basename(audio_path))[0] + '_modified.wav'
+    # modified_audio_path = os.path.join(script_dir, 'audio', modified_audio_name)
+    # modified_audio_path = os.path.join(app.config['UPLOAD_FOLDER'])
+    modified_audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'modified_' + filename)
 
-#     image_stream = BytesIO()
-#     plt.savefig(image_stream, format='png')
-#     plt.close()
-#     image_stream.seek(0)
-#     return image_stream
+    sf.write(modified_audio_path, noisy_audio, sr)  # Assuming mono audio
+    
+    return modified_audio_path
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    print ("Debug 0 : - audio_path ",os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
 
 @app.route('/waveform/<filename>')
 def waveform(filename):
     waveform_image_stream = generate_waveform_image(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return send_file(waveform_image_stream, mimetype='image/png')
-
-# @app.route('/mel_spectrogram/<filename>')
-# def mel_spectrogram(filename):
-#     mel_spectrogram_image_stream = generate_mel_spectrogram(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#     return send_file(mel_spectrogram_image_stream, mimetype='image/png')
-
-# Function to apply the audio modification
-def apply_audio_modification(audio_path):
-    waveform, sample_rate = torchaudio.load(audio_path)
-    
-    # Reverse the waveform
-    modified_waveform = waveform.flip(dims=[1])
-    
-    return modified_waveform
 
 @app.route('/compare', methods=['POST'])
 def compare():
@@ -95,21 +120,23 @@ def compare():
     if file.filename == '':
         return redirect(request.url)
     
+
+    print ("Debug 3 : - audio_path ", os.path.exists(app.config['UPLOAD_FOLDER']) )
+
     if file and allowed_file(file.filename):
         if not os.path.exists(app.config['UPLOAD_FOLDER']):
             os.makedirs(app.config['UPLOAD_FOLDER'])
         
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        print ("Debug 4 : - audio_path ", os.path.join(app.config['UPLOAD_FOLDER'], file.filename) )
+
         file.save(file_path)
-        
+
+        # Original
         original_waveform_image_stream = generate_waveform_image(file_path)
-        # original_mel_spectrogram_image_stream = generate_mel_spectrogram(file_path)
-        
-        modified_waveform = apply_audio_modification(file_path)
-        modified_audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'modified_' + file.filename)
-        torchaudio.save(modified_audio_path, modified_waveform, 44100)  # Adjust sample rate if needed
-        
-        modified_waveform_image_stream = generate_waveform_image(modified_audio_path)
+        # Modification
+        modified_audio_path = apply_audio_modification(file_path, file.filename)
+        modified_waveform_image_stream = generate_waveform_image(file_path)
         # modified_mel_spectrogram_image_stream = generate_mel_spectrogram(modified_audio_path)
         
         return render_template(
@@ -126,6 +153,6 @@ def compare():
 
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run()
+    app.run(debug=True)
+    # app.run()
 
