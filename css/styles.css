@@ -1,0 +1,39 @@
+/* Custom styles */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    margin-top: 30px;
+}
+
+/* Additional styles for specific elements */
+/* Feel free to modify or add more styles as needed */
+
+.animate__animated {
+    animation-duration: 1s;
+}
+
+.animate__fadeInLeft {
+    animation-name: fadeInLeft;
+}
+
+.animate__fadeInRight {
+    animation-name: fadeInRight;
+}
+
+/* Define your own custom styles below */
+
+/* For example, styling the upload button */
+.btn-upload {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+
+/* Adding some margin to the form input and button */
+.input-group .form-control {
+    margin-right: 10px;
+}
+

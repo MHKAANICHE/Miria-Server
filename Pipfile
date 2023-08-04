@@ -5,6 +5,12 @@ name = "pypi"
 
 [packages]
 flask = "*"
+librosa = "*"
+matplotlib = "*"
+torch = "*"
+torchaudio = "*"
+pillow = "*"
+flask-caching = "*"
 
 [dev-packages]
 
