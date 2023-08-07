@@ -9,10 +9,10 @@ import torch
 import torchaudio
 import torchaudio.transforms as T
 from PIL import Image, ImageDraw
-
 import soundfile as sf  # For saving audio files
 from your_model import NoisingAutoencoder  # Import your model class
 import numpy as np
+import time
 
 app = Flask(__name__)
 
@@ -38,7 +38,6 @@ def generate_waveform_image(audio_path):
     image_stream.seek(0)
     return image_stream
 
-
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'wav', 'mp3'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -58,9 +57,10 @@ model.load_state_dict(torch.load("5ouza3bol_hamdi.pt"))
 model.eval()
 
 def apply_audio_modification(audio_path, filename):
+    start_time = time.time()
     # Get the absolute path of the audio file
     audio_path = os.path.join(audio_path)
-    print ("Debug 1 : - audio_path",audio_path)
+    # print ("Debug 1 : - audio_path",audio_path)
 
     # Load your new audio file using librosa
     new_audio, sr = librosa.load(audio_path, sr=None)
@@ -88,12 +88,13 @@ def apply_audio_modification(audio_path, filename):
     
     # Save the modified waveform as a new audio file
     modified_audio_name = os.path.splitext(os.path.basename(audio_path))[0] + '_modified.wav'
-    # modified_audio_path = os.path.join(script_dir, 'audio', modified_audio_name)
-    # modified_audio_path = os.path.join(app.config['UPLOAD_FOLDER'])
+
     modified_audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'modified_' + filename)
 
     sf.write(modified_audio_path, noisy_audio, sr)  # Assuming mono audio
-    
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"apply_audio_modification - Function execution time: {execution_time:.4f} seconds")
     return modified_audio_path
 
 @app.route('/')
@@ -102,34 +103,37 @@ def index():
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    print ("Debug 0 : - audio_path ",os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    # print ("Debug 0 : - audio_path ",os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
 
 @app.route('/waveform/<filename>')
 def waveform(filename):
+    start_time = time.time()
     waveform_image_stream = generate_waveform_image(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"waveform - Function execution time: {execution_time:.4f} seconds")
     return send_file(waveform_image_stream, mimetype='image/png')
 
 @app.route('/compare', methods=['POST'])
 def compare():
+    start_time = time.time()
     if 'file' not in request.files:
         return redirect(request.url)
     
     file = request.files['file']
     if file.filename == '':
         return redirect(request.url)
-    
 
-    print ("Debug 3 : - audio_path ", os.path.exists(app.config['UPLOAD_FOLDER']) )
+    # print ("Debug 3 : - audio_path ", os.path.exists(app.config['UPLOAD_FOLDER']) )
 
     if file and allowed_file(file.filename):
         if not os.path.exists(app.config['UPLOAD_FOLDER']):
             os.makedirs(app.config['UPLOAD_FOLDER'])
         
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        print ("Debug 4 : - audio_path ", os.path.join(app.config['UPLOAD_FOLDER'], file.filename) )
-
+        # print ("Debug 4 : - audio_path ", os.path.join(app.config['UPLOAD_FOLDER'], file.filename) )
         file.save(file_path)
 
         # Original
@@ -138,17 +142,21 @@ def compare():
         modified_audio_path = apply_audio_modification(file_path, file.filename)
         modified_waveform_image_stream = generate_waveform_image(file_path)
         # modified_mel_spectrogram_image_stream = generate_mel_spectrogram(modified_audio_path)
-        
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Compare - Function execution time: {execution_time:.4f} seconds")
         return render_template(
             'index.html',
             original_audio_url=url_for('uploaded_file', filename=file.filename),
             modified_audio_url=url_for('uploaded_file', filename='modified_' + file.filename),
             original_waveform_url=url_for('waveform', filename=file.filename),
             # original_mel_spectrogram_url=url_for('mel_spectrogram', filename=file.filename),
-            modified_waveform_url=url_for('waveform', filename='modified_' + file.filename)
+            modified_waveform_url=url_for('waveform', filename='modified_' + file.filename),
             # modified_mel_spectrogram_url=url_for('mel_spectrogram', filename='modified_' + file.filename),
+            
         )
     
+
     return redirect(request.url)
 
 
