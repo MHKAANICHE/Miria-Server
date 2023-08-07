@@ -95,6 +95,7 @@ def apply_audio_modification(audio_path, filename):
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"apply_audio_modification - Function execution time: {execution_time:.4f} seconds")
+<<<<<<< HEAD
     return modified_audio_path
 
 from concurrent.futures import ThreadPoolExecutor  # For parallelism
@@ -157,6 +158,8 @@ def apply_audio_modification2 (audio_path, filename):
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"apply_audio_modification 2 - Function execution time: {execution_time:.4f} seconds")
+=======
+>>>>>>> 6f3ad1d5f06202f9ba402e4cfea17d92d3384c6d
     return modified_audio_path
 
 @app.route('/')
