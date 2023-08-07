@@ -12,6 +12,9 @@ torchaudio = "*"
 pillow = "*"
 flask-caching = "*"
 soundfile = "*"
+fastapi = "*"
+uvicorn = "*"
+python-multipart = "*"
 
 [dev-packages]
 
